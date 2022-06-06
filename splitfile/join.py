@@ -16,9 +16,14 @@ from pathlib import Path
 
 from rich import print, get_console
 
-from util import error, warning, success, info, debug, prompt_continue_or_quit, prompt_quit, is_a_splitpart, get_base_file, get_splits
+from splitfile.util import error, warning, success, info, debug, prompt_continue_or_quit, prompt_quit, is_a_splitpart, get_base_file, get_splits
 
 files_to_join: set[Path] = set()
+
+dry_run = False
+rm_after_join = False
+assume_yes = False
+verbose = 0
 
 
 def join_file(file: Path) -> bool:
@@ -80,11 +85,11 @@ def populate_files_to_join(file):
         files_to_join.add(file)
 
 
-def main(*paths):
+def join_files(*paths):
     if not paths:
         print(error('no paths provided'))
         sys.exit(1)
-    print(f'[bold]main({paths = !r})')
+    print(f'[bold]join_files({paths = !r})')
     for path in paths:
         if '*' in path:
             for file in filter(os.path.isfile, glob(path)):
@@ -102,13 +107,9 @@ def main(*paths):
         join_file(file)
 
 
-if __name__ == '__main__':
+def main():
+    global dry_run, rm_after_join, assume_yes, verbose
     args = []
-    dry_run = False
-    rm_after_join = False
-    assume_yes = False
-    verbose = 0
-    i = 1
     while sys.argv[1:]:
         arg = sys.argv.pop(1)
         if arg == '-h' or 'help' in arg:
@@ -125,4 +126,8 @@ if __name__ == '__main__':
         else:
             args.append(arg)
 
-    main(*args)
+    join_files(*args)
+
+
+if __name__ == '__main__':
+    main()

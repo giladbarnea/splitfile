@@ -6,5 +6,8 @@ setup(
     version='0.1.0',
         description='Small tool to split and join binary files',
 packages=packages,
-        install_requires=['rich']
+        install_requires=['rich'],
+entry_points = {
+        "console_scripts": ["joinpy=splitfile.join:main", "splitpy=splitfile.split:main"]
+    }
         )

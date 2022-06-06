@@ -12,7 +12,10 @@ from pathlib import Path
 
 from rich import print, get_console
 
-from util import prompt_quit, debug, info, prompt_continue_or_quit, success, error, warning, is_a_splitpart, get_splits
+from splitfile.util import prompt_quit, debug, info, prompt_continue_or_quit, success, error, warning, is_a_splitpart, get_splits
+
+split_bytes = '49MB'
+dry_run = False
 
 
 def split_file(path, split: str):
@@ -66,11 +69,11 @@ def split_file(path, split: str):
         return False
 
 
-def main(*paths, split: str):
+def split_files(*paths, split: str):
     if not paths:
         print(error('no paths provided'))
         sys.exit(1)
-    print(f'[bold]main({paths = !r}, {split = !r})')
+    print(f'[bold]split_files({paths = !r}, {split = !r})')
     for path in paths:
         if '*' in path:
             for file in filter(os.path.isfile, glob(path)):
@@ -86,11 +89,9 @@ def main(*paths, split: str):
         prompt_quit(warning(f'{path!r} is not a file, nor a dir, and no "*" so cant glob. skipping'))
 
 
-if __name__ == '__main__':
+def main():
+    global dry_run, split_bytes
     args = []
-    split_bytes = '49MB'
-    dry_run = False
-    i = 1
     while sys.argv[1:]:
         arg = sys.argv.pop(1)
         if arg.startswith('-b') or arg.startswith('--bytes'):
@@ -106,4 +107,9 @@ if __name__ == '__main__':
         else:
             args.append(arg)
 
-    main(*args, split=split_bytes)
+    split_files(*args, split=split_bytes)
+    split_files(*sys.argv[1:], split='49MB')
+
+
+if __name__ == '__main__':
+    main()
