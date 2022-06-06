@@ -44,21 +44,21 @@ def split_file(path, split: str):
             print(info(f'"{path}" size is <= {split}; skipping ({file_size = :,.2f}{unit})'))
             return True
 
-        if splits:=get_splits(path):
+        if splits := get_splits(path):
             print(info(f'"{path}" already split to {len(splits)} splits; skipping'))
             return True
         prompt_continue_or_quit(f'[bold]splitting "{path}" ({file_size = :,.2f}{unit})')
         prefix = str(path) + '.'
-        command = f'split -d --bytes {split} "{path}" "{prefix}"'
+        split_command = f'split -d --bytes {split} "{path}" "{prefix}"'
         if dry_run:
-            print(info(f'Dry run; would have run: {command!r}'))
+            print(info(f'Dry run; would have run: {split_command!r}'))
             return True
-        split_exitcode = os.system(command)
+        split_exitcode = os.system(split_command)
         split_success = split_exitcode == 0
         if split_success:
-            print(success(command))
+            print(success(split_command))
         else:
-            prompt_quit(error(f'FAILED: {command}'))
+            prompt_quit(error(f'FAILED: {split_command}'))
         return success
     except Exception as e:
         get_console().print_exception(width=os.get_terminal_size()[0], show_locals=True)
