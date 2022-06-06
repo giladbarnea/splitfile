@@ -61,7 +61,7 @@ def split_file(path, split: str):
         if dry_run:
             print(info(f'Dry run; would have run: {split_command!r}'))
             return True
-        info(f'running: {split_command!r}...')
+        print(info(f'running: {split_command!r}...'))
         split_exitcode = os.system(split_command)
         split_success = split_exitcode == 0
         if split_success:

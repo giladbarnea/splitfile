@@ -42,6 +42,7 @@ def join_file(file: Path) -> bool:
             prompt_quit(message)
             return False
         message = f'[bold]joining "{file}" ({len(splits)} splits, {sum(os.stat(split).st_size for split in splits) / 1_000_000:,.2f} MB total)'
+        file_exists = file.exists()
         if verbose:
             print(debug(f'Splits: {", ".join(splits)}'))
         if assume_yes:
@@ -51,10 +52,13 @@ def join_file(file: Path) -> bool:
         join_command = f'cat {" ".join(map(repr, splits))} > "{joined_path}"'
         join_exitcode = os.system(join_command)
         join_success = join_exitcode == 0
-        if not join_success:
+        if join_success:
+            print(info('. '.join(filter(bool, [f'Joined "{file}" into "{joined_path}"',
+                                               f'Now diffing...' if file_exists else '']))))
+        else:
             prompt_quit(error(f'cat failed ({join_exitcode}) for {len(splits)} splits of "{file}"'))
             return False
-        if file.exists():
+        if file_exists:
             diff_command = f'diff -a "{joined_path}" "{file}"'
             diff_exitcode = os.system(diff_command)
             identical = diff_exitcode == 0
