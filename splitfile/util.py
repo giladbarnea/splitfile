@@ -21,6 +21,7 @@ def success(message):
 def info(message):
     return f'[bold on rgb(60,60,60)]info  [/]｜ {message}'
 
+
 def debug(message):
     return f'[bold dim on rgb(60,60,60)]debug  [/]｜ [dim]{message}'
 

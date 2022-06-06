@@ -5,8 +5,11 @@ join.py 'lesson1/*.m*'
 join.py lesson1 --rm
 join.py lesson2 lesson1/Lesson_1_Introduction_Part_1.m4a --dry-run
 
+If PATH exists, the joined splits are diffed against the pre-existing file.
+If they're the same, the joined file is not renamed, and depending on --rm, the splits are removed.
+
 --rm: remove .00 files after joining
---dry-run: don't actually join .00 files into a single file (diff if original exists)
+--dry-run: don't actually rename the split files into a PATH (still diffs the joined splits if original exists)
 -y: assume "yes" non-problem prompts
 """
 import os

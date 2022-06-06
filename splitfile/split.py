@@ -2,7 +2,7 @@
 """
 split.py PATH... [-b, --bytes=SIZE (default 49MB)] [--dry-run] [-h, --help]
 split.py 'lesson1/*.m*'
-split.py lesson1 --bytes 45MB
+split.py lesson1 --bytes 49MB
 split.py lesson2 lesson1/Lesson_1_Introduction_Part_1.m4a -b 10MB
 """
 import os
@@ -19,43 +19,49 @@ dry_run = False
 
 
 def split_file(path, split: str):
+    """'split' is e.g '49MB' or '10KB'"""
     try:
         path = Path(path)
         split = split.upper()
         stat = os.stat(path)
+        # 'normalized_file_size' is normalized to 'unit', depending on 'split', to compare afterwards.
+        # e.g if 'split' is '49MB', and actual file size is 50MB, then 'normalized_file_size' is 50, 'split_by' is 49, and 'unit' is 'MB'.
         if split.endswith('KB'):
-            file_size = stat.st_size / 1_000
-            split_amount = int(split[:-2])
+            normalized_file_size = stat.st_size / 1_000
+            split_by = int(split[:-2])
             unit = 'KB'
         elif split.endswith('MB'):
-            file_size = stat.st_size / 1_000_000
-            split_amount = int(split[:-2])
+            normalized_file_size = stat.st_size / 1_000_000
+            split_by = int(split[:-2])
             unit = 'MB'
         elif split.endswith('GB'):
-            file_size = stat.st_size / 1_000_000_000
-            split_amount = int(split[:-2])
+            normalized_file_size = stat.st_size / 1_000_000_000
+            split_by = int(split[:-2])
             unit = 'GB'
         else:
-            file_size = stat.st_size
-            split_amount = int(split)
+            normalized_file_size = stat.st_size
+            split_by = int(split)
             unit = 'B'
         if is_a_splitpart(path):
             print(debug(f'{path} is a split part, skipping'))
             return True
         print()
-        if file_size <= split_amount:
-            print(info(f'"{path}" size is <= {split}; skipping ({file_size = :,.2f}{unit})'))
+        if normalized_file_size <= split_by:
+            print(info(f'"{path}" size is <= {split}; skipping ({normalized_file_size = :,.2f}{unit})'))
             return True
 
         if splits := get_splits(path):
             print(info(f'"{path}" already split to {len(splits)} splits; skipping'))
             return True
-        prompt_continue_or_quit(f'[bold]splitting "{path}" ({file_size = :,.2f}{unit})')
+        # suffix_length is 2 by default. This means max 100 splits. With big files, that's not enough.
+        suffix_length = len(str(int(normalized_file_size / split_by)))
         prefix = str(path) + '.'
-        split_command = f'split -d --bytes {split} "{path}" "{prefix}"'
+        split_command = f'split -d -b {split} -a {suffix_length} "{path}" "{prefix}"'
+        prompt_continue_or_quit(f'[bold]splitting "{path}" ({normalized_file_size = :,.2f}{unit}) by running:\n\t[/][reset][i on rgb(50,50,50)]{split_command}')
         if dry_run:
             print(info(f'Dry run; would have run: {split_command!r}'))
             return True
+        info(f'running: {split_command!r}...')
         split_exitcode = os.system(split_command)
         split_success = split_exitcode == 0
         if split_success:
@@ -108,7 +114,6 @@ def main():
             args.append(arg)
 
     split_files(*args, split=split_bytes)
-    split_files(*sys.argv[1:], split='49MB')
 
 
 if __name__ == '__main__':
