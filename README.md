@@ -1,7 +1,9 @@
 # splitfile
 
 repo size limit: soft 5GB, hard 100GB
+
 file size limit: 100MB
+
 push size limit: 2GB
 
 https://stackoverflow.com/questions/38768454/repository-size-limits-for-github-com
